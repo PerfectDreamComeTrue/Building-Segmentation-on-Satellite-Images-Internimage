@@ -11,7 +11,7 @@ Our segmentation code is developed on top of [MMSegmentation v0.27.0](https://gi
 - Clone this repo:
 
 ```bash
-git clone https://github.com/OpenGVLab/InternImage.git
+git clone https://github.com/PerfectDreamComeTrue/Building-Segmentation-on-Satellite-Images-Internimage.git
 cd InternImage
 ```
 
@@ -31,12 +31,22 @@ For examples, to install torch==1.11 with CUDA==11.3:
 pip install torch==1.11.0+cu113 torchvision==0.12.0+cu113 -f https://download.pytorch.org/whl/torch_stable.html
 ```
 
-- Install `timm==0.6.11` and `mmcv-full==1.5.0`:
+- Install `timm==0.6.11` and `mmcv-full==1.6.0`:
 
 ```bash
 pip install -U openmim
-mim install mmcv-full==1.5.0
-pip install timm==0.6.11 mmdet==2.28.1
+!pip install mmcv-full==1.6.0
+!pip install timm==0.6.11 mmdet==2.28.1
+!pip install mmengine
+```
+
+- Install `mmsegmentation==0.27.0`:
+```bash
+git clone https://github.com/open-mmlab/mmsegmentation.git
+cd mmsegmentation
+git checkout v0.27.0
+pip install -v -e .
+pip install mmsegmentation
 ```
 
 - Install other requirements:
@@ -57,32 +67,46 @@ python test.py
 
 ### Data Preparation
 
-Prepare datasets according to the [guidelines](https://github.com/open-mmlab/mmsegmentation/blob/master/docs/en/dataset_prepare.md#prepare-datasets) in MMSegmentation.
-
+I use Cityscapes format
+```bash
+Cityscapes
+  └───leftImg8bit
+  │   └───train
+  │   │   └───{image_id}_leftImg8bit.png   
+  │   └───val
+  │   │   └───{image_id}_leftImg8bit.png
+  │   └───test
+  │       └───{image_id}_leftImg8bit.png
+  └───gtFine
+      └───train
+      │   └───{image_id}_gtFine_TrainlabelIds.png
+      └───val
+          └───{image_id}_gtFine_TrainlabelIds.png
+```
 
 ### Evaluation
 
-To evaluate our `InternImage` on ADE20K val, run:
+To evaluate `InternImage` on `Cicyscapes_custum` val, run:
 
 ```bash
 sh dist_test.sh <config-file> <checkpoint> <gpu-num> --eval mIoU
 ```
 
-For example, to evaluate the `InternImage-T` with a single GPU:
+For example, to evaluate the `InternImage-T` with a `single GPU`:
 
 ```bash
-python test.py configs/ade20k/upernet_internimage_t_512_160k_ade20k.py checkpoint_dir/seg/upernet_internimage_t_512_160k_ade20k.pth --eval mIoU
+python test.py configs/cityscapes/upernet_internimage_t_512x1024_40k_cityscapes_custom.py checkpoint_dir/seg/upernet_internimage_t_512x1024_40k_cityscapes_custom.pth --eval mIoU
 ```
 
 For example, to evaluate the `InternImage-B` with a single node with 8 GPUs:
 
 ```bash
-sh dist_test.sh configs/ade20k/upernet_internimage_b_512_160k_ade20k.py checkpoint_dir/seg/upernet_internimage_b_512_160k_ade20k.pth 8 --eval mIoU
+sh dist_test.sh configs/cityscapes/upernet_internimage_t_512x1024_40k_cityscapes_custom.py checkpoint_dir/seg/upernet_internimage_t_512x1024_40k_cityscapes_custom.pth 8 --eval mIoU
 ```
 
 ### Training
 
-To train an `InternImage` on ADE20K, run:
+To train an `InternImage` on `Cicyscapes_custum`, run:
 
 ```bash
 sh dist_train.sh <config-file> <gpu-num>
@@ -91,16 +115,9 @@ sh dist_train.sh <config-file> <gpu-num>
 For example, to train `InternImage-T` with 8 GPU on 1 node (total batch size 16), run:
 
 ```bash
-sh dist_train.sh configs/ade20k/upernet_internimage_t_512_160k_ade20k.py 8
+sh dist_train.sh configs/cityscapes/upernet_internimage_t_512x1024_40k_cityscapes_custom.py 8
 ```
 
-### Manage Jobs with Slurm
-
-For example, to train `InternImage-XL` with 8 GPU on 1 node (total batch size 16), run:
-
-```bash
-GPUS=8 sh slurm_train.sh <partition> <job-name> configs/ade20k/upernet_internimage_xl_640_160k_ade20k.py
-```
 
 ### Image Demo
 To inference a single image like this:
